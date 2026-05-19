@@ -16,7 +16,7 @@ A simple student assistant application designed to help manage and streamline st
   <img src="assets/images/register.png" width="45%" />
 </p>
 
-<p float="left">
+<p float="right">
   <h4>Student Assistant</h4>
   <img src="assets/images/application.png" width="45%" />
   <img src="assets/images/modules.png" width="45%" />
