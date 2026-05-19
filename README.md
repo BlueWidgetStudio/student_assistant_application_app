@@ -10,17 +10,20 @@ A simple student assistant application designed to help manage and streamline st
 
 ## Preview
 
-<p float="left">
-  <h4>Authentication</h4>
-  <img src="assets/images/login.png" width="45%" />
-  <img src="assets/images/register.png" width="45%" />
-</p>
+## Authentication
+### Login Screen
+![Home Screen](assets/images/login.png)
 
-<p float="right">
-  <h4>Student Assistant</h4>
-  <img src="assets/images/application.png" width="45%" />
-  <img src="assets/images/modules.png" width="45%" />
-</p>
+### Register Screen
+![Home Screen](assets/images/register.png)
+
+
+## Student Assistant
+### Application Screen
+![Home Screen](assets/images/application.png)
+
+### Application Screen
+![Home Screen](assets/images/modules.png)
 
 ## Tech Stack
 - Flutter and Dart 
