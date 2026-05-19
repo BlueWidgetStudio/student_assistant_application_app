@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:student_assistant_application_app/app_constants.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:student_assistant_application_app/views/pages/login_page.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -19,13 +21,64 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
+  bool isLoading = false;
 
   void tooglePasswordVisibility() {
-    obscurePassword = !obscurePassword;
+    setState(() {
+      obscurePassword = !obscurePassword;
+    });
   }
 
   void toogleConfirmPasswordVisibility() {
-    obscureConfirmPassword = !obscureConfirmPassword;
+    setState(() {
+      obscureConfirmPassword = !obscureConfirmPassword;
+    });
+  }
+
+  Future<void> registerUser() async {
+    if (!_registerFormKey.currentState!.validate()) {
+      return;
+    }
+
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      await Supabase.instance.client.auth.signUp(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+
+        data: {
+          'first_name': _firstNameController.text.trim(),
+          'last_name': _lastNameController.text.trim(),
+          'role': 'student',
+        },
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Account created successfully')),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      }
+    } on AuthException catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -353,7 +406,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: isLoading ? null : registerUser,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppConstants.accentColor,
                             foregroundColor: Colors.white,
@@ -362,7 +415,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               borderRadius: BorderRadiusGeometry.circular(10),
                             ),
                           ),
-                          child: Text('Create Account'),
+                          child: isLoading
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                              : const Text('Create Account'),
                         ),
                       ),
                       SizedBox(height: 20),
@@ -373,7 +430,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         children: [
                           Text('Already have an account?'),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginPage(),
+                                ),
+                              );
+                            },
                             style: TextButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadiusGeometry.circular(10),

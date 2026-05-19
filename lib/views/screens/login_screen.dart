@@ -3,6 +3,7 @@ import 'package:student_assistant_application_app/app_constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:student_assistant_application_app/views/pages/home_page.dart';
 import 'package:student_assistant_application_app/views/pages/register_page.dart';
+import 'package:student_assistant_application_app/views/pages/admin_page.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -50,11 +51,19 @@ class _LoginScreenState extends State<LoginScreen> {
           context,
         ).showSnackBar(const SnackBar(content: Text('Login successful')));
 
-        Navigator.pushReplacement(
-          // ignore: use_build_context_synchronously
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-        );
+        final role = user.userMetadata?['role'];
+
+        if (role == 'admin') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const AdminPage()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()),
+          );
+        }
       }
     } on AuthException catch (e) {
       ScaffoldMessenger.of(
