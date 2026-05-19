@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:student_assistant_application_app/app_constants.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:student_assistant_application_app/views/pages/home_page.dart';
+import 'package:student_assistant_application_app/views/pages/register_page.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,6 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _loginFormKey = GlobalKey<FormState>();
   static String selectedRole = 'Student';
   bool obscurePassword = true;
+  bool isLoading = false;
 
   final TextEditingController _emailController = TextEditingController();
 
@@ -21,6 +25,52 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       obscurePassword = !obscurePassword;
     });
+  }
+
+  Future<void> loginUser() async {
+    if (!_loginFormKey.currentState!.validate()) {
+      return;
+    }
+
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      final response = await Supabase.instance.client.auth.signInWithPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      final user = response.user;
+
+      if (user != null) {
+        ScaffoldMessenger.of(
+          // ignore: use_build_context_synchronously
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Login successful')));
+
+        Navigator.pushReplacement(
+          // ignore: use_build_context_synchronously
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      }
+    } on AuthException catch (e) {
+      ScaffoldMessenger.of(
+        // ignore: use_build_context_synchronously
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        // ignore: use_build_context_synchronously
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -261,7 +311,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: isLoading ? null : loginUser,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppConstants.accentColor,
                             foregroundColor: Colors.white,
@@ -270,7 +320,11 @@ class _LoginScreenState extends State<LoginScreen> {
                               borderRadius: BorderRadiusGeometry.circular(10),
                             ),
                           ),
-                          child: Text('Login'),
+                          child: isLoading
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                              : const Text('Login'),
                         ),
                       ),
                       SizedBox(height: 20),
@@ -281,7 +335,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           Text('Don\'t have an account?'),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const RegisterPage(),
+                                ),
+                              );
+                            },
                             style: TextButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadiusGeometry.circular(10),

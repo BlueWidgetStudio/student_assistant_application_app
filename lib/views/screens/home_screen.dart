@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:student_assistant_application_app/app_constants.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:student_assistant_application_app/views/pages/login_page.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+
+    final email = user?.email ?? 'User';
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(25),
@@ -20,7 +25,7 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Welcome username',
+                      'Welcome $email',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -36,7 +41,17 @@ class HomeScreen extends StatelessWidget {
                 ),
 
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    await Supabase.instance.client.auth.signOut();
+
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                      (route) => false,
+                    );
+                  },
                   child: Text(
                     'Sign out',
                     style: TextStyle(color: Colors.red[800]),
