@@ -68,10 +68,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       }
     } on AuthException catch (e) {
       ScaffoldMessenger.of(
+        // ignore: use_build_context_synchronously
         context,
       ).showSnackBar(SnackBar(content: Text(e.message)));
     } catch (e) {
       ScaffoldMessenger.of(
+        // ignore: use_build_context_synchronously
         context,
       ).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {

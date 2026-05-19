@@ -55,11 +55,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
         if (role == 'admin') {
           Navigator.pushReplacement(
+            // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(builder: (context) => const AdminPage()),
           );
         } else {
           Navigator.pushReplacement(
+            // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(builder: (context) => const HomePage()),
           );
