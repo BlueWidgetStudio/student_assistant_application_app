@@ -1,0 +1,304 @@
+import 'package:flutter/material.dart';
+import 'package:student_assistant_application_app/app_constants.dart';
+
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _loginFormKey = GlobalKey<FormState>();
+  static String selectedRole = 'Student';
+  bool obscurePassword = true;
+
+  final TextEditingController _emailController = TextEditingController();
+
+  final TextEditingController _passwordController = TextEditingController();
+
+  void tooglePasswordVisibility() {
+    setState(() {
+      obscurePassword = !obscurePassword;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Application Icon
+            Container(
+              height: 80,
+              width: 80,
+              decoration: BoxDecoration(
+                color: AppConstants.shadowColor,
+                borderRadius: BorderRadius.circular(80),
+              ),
+              child: Center(
+                child: Icon(
+                  selectedRole == 'Student'
+                      ? Icons.school_outlined
+                      : Icons.person,
+                  size: 45,
+                  color: AppConstants.accentColor,
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+
+            // Application Name
+            Text(
+              'IT Department',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+            ),
+            SizedBox(height: 5),
+
+            // Application Description
+            Text(
+              'Student Assistsant Application System',
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+            SizedBox(height: 30),
+
+            // Login Form
+            Form(
+              key: _loginFormKey,
+              autovalidateMode: AutovalidateMode.onUnfocus,
+              child: SizedBox(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 50.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Login As
+                      Text('Login As'),
+                      SizedBox(height: 10),
+
+                      // Login As Form Input
+                      Row(
+                        children: [
+                          // Student Button
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  selectedRole = 'Student';
+                                });
+                              },
+                              style: TextButton.styleFrom(
+                                backgroundColor: selectedRole == 'Student'
+                                    ? AppConstants.shadowColor
+                                    : Colors.transparent,
+
+                                foregroundColor: selectedRole == 'Student'
+                                    ? AppConstants.accentColor
+                                    : Colors.grey[700],
+
+                                side: BorderSide(
+                                  color: selectedRole == 'Student'
+                                      ? AppConstants.accentColor as Color
+                                      : Colors.grey.shade300,
+                                  width: 2.0,
+                                ),
+
+                                padding: const EdgeInsets.all(20),
+
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadiusGeometry.circular(
+                                    10,
+                                  ),
+                                ),
+                              ),
+                              child: Text(
+                                'Student',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(width: 10),
+
+                          // Admin Button
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  selectedRole = 'Admin';
+                                });
+                              },
+                              style: TextButton.styleFrom(
+                                backgroundColor: selectedRole == 'Admin'
+                                    ? AppConstants.shadowColor
+                                    : Colors.transparent,
+
+                                foregroundColor: selectedRole == 'Admin'
+                                    ? AppConstants.accentColor
+                                    : Colors.grey[700],
+
+                                side: BorderSide(
+                                  color: selectedRole == 'Admin'
+                                      ? AppConstants.accentColor as Color
+                                      : Colors.grey.shade300,
+                                  width: 2.0,
+                                ),
+
+                                padding: const EdgeInsets.all(20),
+
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadiusGeometry.circular(
+                                    10,
+                                  ),
+                                ),
+                              ),
+                              child: Text(
+                                'Admin',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+
+                      // Email Address
+                      Text('Email Address'),
+                      SizedBox(height: 10),
+
+                      // Email Address Form Input
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          hintText: 'you@stud.cut.ac.za',
+                          hintStyle: TextStyle(color: Colors.grey[400]),
+                          border: OutlineInputBorder(),
+
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(
+                              color: Colors.grey.shade300,
+                              width: 1.5,
+                            ),
+                          ),
+
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(
+                              color: AppConstants.accentColor as Color,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Email is required.';
+                          }
+
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 20),
+
+                      // Password
+                      Text('Password'),
+                      SizedBox(height: 10),
+
+                      // Password Form Input
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: obscurePassword,
+                        decoration: InputDecoration(
+                          hintText: '••••••••',
+                          hintStyle: TextStyle(color: Colors.grey[400]),
+                          border: OutlineInputBorder(),
+
+                          suffixIcon: IconButton(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            onPressed: tooglePasswordVisibility,
+                            icon: obscurePassword
+                                ? Icon(
+                                    Icons.visibility_off,
+                                    color: Colors.grey[400],
+                                  )
+                                : Icon(
+                                    Icons.visibility,
+                                    color: AppConstants.accentColor,
+                                  ),
+                          ),
+
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(
+                              color: Colors.grey.shade300,
+                              width: 1.5,
+                            ),
+                          ),
+
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(
+                              color: AppConstants.accentColor as Color,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Password is required.';
+                          }
+
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 30),
+
+                      // Login Button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppConstants.accentColor,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.all(20),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadiusGeometry.circular(10),
+                            ),
+                          ),
+                          child: Text('Login'),
+                        ),
+                      ),
+                      SizedBox(height: 20),
+
+                      // Alternative Action (Register)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Don\'t have an account?'),
+                          TextButton(
+                            onPressed: () {},
+                            style: TextButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadiusGeometry.circular(10),
+                              ),
+                            ),
+                            child: Text('Register here'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
