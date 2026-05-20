@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:student_assistant_application_app/app_constants.dart';
+import 'package:student_assistant_application_app/widgets/bottom_navigation_bar.dart';
 
 class ApplicationsScreen extends StatelessWidget {
   const ApplicationsScreen({super.key});
@@ -106,6 +107,7 @@ class ApplicationsScreen extends StatelessWidget {
           ],
         ),
       ),
+      bottomNavigationBar: CustomBottonNavigation(),
     );
   }
 }

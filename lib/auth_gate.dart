@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:student_assistant_application_app/views/pages/app_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'views/pages/home_page.dart';
 import 'views/pages/login_page.dart';
 
 class AuthGate extends StatelessWidget {
@@ -12,7 +12,7 @@ class AuthGate extends StatelessWidget {
     final session = Supabase.instance.client.auth.currentSession;
 
     if (session != null) {
-      return const HomePage();
+      return const AppPage();
     }
 
     return const LoginPage();

@@ -1,10 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:student_assistant_application_app/app_constants.dart';
+import 'package:student_assistant_application_app/main.dart';
+import 'package:student_assistant_application_app/views/pages/new_application_page.dart';
+import 'package:student_assistant_application_app/widgets/bottom_navigation_bar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:student_assistant_application_app/views/pages/login_page.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late Future<List<dynamic>> applicationsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+
+    applicationsFuture = Supabase.instance.client.from('applications').select();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +34,6 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Greet user
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -25,38 +41,47 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Welcome $email',
+                      'Welcome, $email',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     SizedBox(height: 5),
-
                     Text(
                       'Track your student assistant applications',
                       style: TextStyle(color: Colors.grey[600]),
                     ),
                   ],
                 ),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () async {
+                        setState(() {
+                          applicationsFuture = Supabase.instance.client
+                              .from('applications')
+                              .select();
+                        });
+                      },
+                      icon: Icon(Icons.refresh_rounded),
+                    ),
+                    IconButton(
+                      onPressed: () async {
+                        await Supabase.instance.client.auth.signOut();
 
-                TextButton(
-                  onPressed: () async {
-                    await Supabase.instance.client.auth.signOut();
-
-                    Navigator.pushAndRemoveUntil(
-                      // ignore: use_build_context_synchronously
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginPage(),
-                      ),
-                      (route) => false,
-                    );
-                  },
-                  child: Text(
-                    'Sign out',
-                    style: TextStyle(color: Colors.red[800]),
-                  ),
+                        Navigator.pushAndRemoveUntil(
+                          // ignore: use_build_context_synchronously
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginPage(),
+                          ),
+                          (route) => false,
+                        );
+                      },
+                      icon: Icon(Icons.logout),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -82,11 +107,27 @@ class HomeScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Applications',
-                                  style: TextStyle(fontSize: 16),
+                                FutureBuilder(
+                                  future: supabase
+                                      .from('applications')
+                                      .select(),
+                                  builder: (context, snapshot) {
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Applications',
+                                          style: TextStyle(fontSize: 16),
+                                        ),
+                                        Text(
+                                          snapshot.data!.length.toString(),
+                                          style: TextStyle(fontSize: 24),
+                                        ),
+                                      ],
+                                    );
+                                  },
                                 ),
-                                Text('0', style: TextStyle(fontSize: 24)),
                               ],
                             ),
                           ),
@@ -101,7 +142,7 @@ class HomeScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Icon(
-                              Icons.people_alt_outlined,
+                              Icons.dashboard_customize_outlined,
                               color: AppConstants.accentColor,
                             ),
                           ),
@@ -111,47 +152,6 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: 5),
-
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: BoxBorder.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            height: 60,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Modules', style: TextStyle(fontSize: 16)),
-                                Text('0', style: TextStyle(fontSize: 24)),
-                              ],
-                            ),
-                          ),
-
-                          Container(
-                            height: 45,
-                            width: 45,
-                            decoration: BoxDecoration(
-                              color: const Color(0x21FFC107),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Icon(
-                              Icons.library_books_rounded,
-                              color: const Color.fromARGB(255, 219, 166, 5),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
             SizedBox(height: 20),
@@ -172,7 +172,14 @@ class HomeScreen extends StatelessWidget {
                       children: [
                         Text('Recent Applications'),
                         ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => NewApplicationPage(),
+                              ),
+                            );
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppConstants.accentColor,
                             foregroundColor: Colors.white,
@@ -203,21 +210,99 @@ class HomeScreen extends StatelessWidget {
                     SizedBox(
                       height: 480,
                       child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.storage,
-                              color: Colors.grey[400],
-                              size: 32,
-                            ),
-                            SizedBox(height: 10),
+                        child: SizedBox(
+                          height: 480,
+                          child: FutureBuilder(
+                            future: supabase.from('applications').select(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return Center(
+                                  child: Container(
+                                    padding: EdgeInsets.all(15),
+                                    height: 110,
+                                    decoration: BoxDecoration(
+                                      color: const Color.fromARGB(64, 0, 0, 0),
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        CircularProgressIndicator(
+                                          color: AppConstants.accentColor,
+                                        ),
+                                        SizedBox(height: 20),
+                                        Text(
+                                          'Please wait',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }
 
-                            Text(
-                              'No applications yet',
-                              style: TextStyle(color: Colors.grey[400]),
-                            ),
-                          ],
+                              if (snapshot.hasError) {
+                                return Center(
+                                  child: Text(snapshot.error.toString()),
+                                );
+                              }
+
+                              final applications = snapshot.data ?? [];
+
+                              if (applications.isEmpty) {
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.storage,
+                                      color: Colors.grey[400],
+                                      size: 32,
+                                    ),
+                                    SizedBox(height: 10),
+                                    Text(
+                                      'No applications yet',
+                                      style: TextStyle(color: Colors.grey[400]),
+                                    ),
+                                  ],
+                                );
+                              }
+                              return ListView.builder(
+                                itemCount: applications.length,
+                                itemBuilder: (context, index) {
+                                  final app = applications[index];
+
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 5.0,
+                                    ),
+                                    child: Card(
+                                      color: const Color.fromARGB(
+                                        255,
+                                        247,
+                                        247,
+                                        247,
+                                      ),
+                                      child: ListTile(
+                                        title: Text(app['module'] ?? ''),
+                                        subtitle: Text(
+                                          app['motivation'] ?? '',
+                                          style: TextStyle(color: Colors.grey),
+                                        ),
+                                        trailing: Text(
+                                          app['academicLevel'] ?? '',
+                                          style: TextStyle(
+                                            color: AppConstants.accentColor,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
@@ -228,6 +313,7 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
+      bottomNavigationBar: CustomBottonNavigation(),
     );
   }
 }

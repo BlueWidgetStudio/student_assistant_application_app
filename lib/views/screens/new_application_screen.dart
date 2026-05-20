@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:student_assistant_application_app/app_constants.dart';
+import 'package:student_assistant_application_app/models/application.dart';
+import 'package:student_assistant_application_app/viewmodels/application_view_model.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class NewApplicationScreen extends StatefulWidget {
   const NewApplicationScreen({super.key});
@@ -9,11 +13,75 @@ class NewApplicationScreen extends StatefulWidget {
 }
 
 class _NewApplicationScreenState extends State<NewApplicationScreen> {
+  final _motivationController = TextEditingController();
+
   String selectedLevel = 'First Year';
+  String selectedModule = '';
   bool percentageChecked = false;
   bool isRegistered = false;
-  bool academicMisconducted = false;
+  bool noAcademicMisconduct = false;
   bool isAvailable = false;
+
+  Future<void> _submitApplication() async {
+    try {
+      final newApplication = Application(
+        academicLevel: selectedLevel,
+        module: selectedModule,
+        motivation: _motivationController.text,
+        meetsRequirements: _requirementsMet(),
+      );
+
+      if (_requirementsMet()) {
+        await context.read<ApplicationViewModel>().create(newApplication);
+
+        ScaffoldMessenger.of(
+          // ignore: use_build_context_synchronously
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Application submitted')));
+
+        // ignore: use_build_context_synchronously
+        Navigator.pop(context);
+      }
+    } on PostgrestException catch (e) {
+      ScaffoldMessenger.of(
+        // ignore: use_build_context_synchronously
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        // ignore: use_build_context_synchronously
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
+  }
+
+  bool _requirementsMet() {
+    bool isMet = true;
+
+    if (!percentageChecked) {
+      isMet = false;
+    }
+
+    if (!isRegistered) {
+      isMet = false;
+    }
+
+    if (!noAcademicMisconduct) {
+      isMet = false;
+    }
+
+    if (!isAvailable) {
+      isMet = false;
+    }
+
+    return isMet;
+  }
+
+  @override
+  void dispose() {
+    _motivationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -197,7 +265,11 @@ class _NewApplicationScreenState extends State<NewApplicationScreen> {
                     // Module Form Input
                     DropdownMenuFormField(
                       width: double.infinity,
-                      label: Text('Select a module'),
+                      label: Text(
+                        selectedModule == ''
+                            ? 'Select a module'
+                            : selectedModule,
+                      ),
                       menuStyle: MenuStyle(
                         backgroundColor: WidgetStatePropertyAll(Colors.white),
                         shape: WidgetStatePropertyAll(
@@ -230,7 +302,14 @@ class _NewApplicationScreenState extends State<NewApplicationScreen> {
                         DropdownMenuEntry(value: 'TPG316C', label: 'TPG316C'),
                         DropdownMenuEntry(value: 'ITS316C', label: 'ITSC316C'),
                       ],
-                      onSaved: (value) {},
+                      onSelected: (value) {
+                        setState(() {
+                          selectedModule = value ?? '';
+                        });
+                      },
+                      onSaved: (value) {
+                        selectedModule = value ?? '';
+                      },
                     ),
                     SizedBox(height: 35),
 
@@ -320,10 +399,10 @@ class _NewApplicationScreenState extends State<NewApplicationScreen> {
                         CheckboxListTile(
                           controlAffinity: ListTileControlAffinity.leading,
                           title: Text('No academic misconduct record'),
-                          value: academicMisconducted,
+                          value: noAcademicMisconduct,
                           onChanged: (value) {
                             setState(() {
-                              academicMisconducted = value!;
+                              noAcademicMisconduct = value!;
                             });
                           },
                         ),
@@ -364,6 +443,7 @@ class _NewApplicationScreenState extends State<NewApplicationScreen> {
                     TextFormField(
                       minLines: 5,
                       maxLines: 7,
+                      controller: _motivationController,
                       decoration: InputDecoration(
                         hintText:
                             'Tell us why you want to be a Student Assistant for this module...',
@@ -423,7 +503,7 @@ class _NewApplicationScreenState extends State<NewApplicationScreen> {
 
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: () {},
+                            onPressed: _submitApplication,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppConstants.accentColor,
                               foregroundColor: Colors.white,

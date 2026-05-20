@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:student_assistant_application_app/widgets/bottom_navigation_bar.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -99,6 +100,7 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
       ),
+      bottomNavigationBar: CustomBottonNavigation(),
     );
   }
 }

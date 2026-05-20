@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:student_assistant_application_app/app_constants.dart';
 import 'package:student_assistant_application_app/auth_gate.dart';
+import 'package:student_assistant_application_app/viewmodels/application_view_model.dart';
+import 'package:student_assistant_application_app/viewmodels/bottom_navigation_view_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,21 +17,33 @@ void main() async {
   runApp(const App());
 }
 
+final supabase = Supabase.instance.client;
+
 class App extends StatelessWidget {
   const App({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ApplicationViewModel()),
+        ChangeNotifierProvider(
+          create: (context) => BottomNavigationViewModel(),
+        ),
+      ],
+      builder: (context, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
 
-      title: 'Student Assistant Application System',
-      themeMode: ThemeMode.light,
+          title: 'Student Assistant Application System',
+          themeMode: ThemeMode.light,
 
-      theme: AppConstants.lightTheme,
-      darkTheme: AppConstants.darkTheme,
+          theme: AppConstants.lightTheme,
+          darkTheme: AppConstants.darkTheme,
 
-      home: const AuthGate(),
+          home: const AuthGate(),
+        );
+      },
     );
   }
 }
