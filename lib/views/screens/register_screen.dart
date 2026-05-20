@@ -45,26 +45,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
         isLoading = true;
       });
 
-      await Supabase.instance.client.auth.signUp(
+      final response = await Supabase.instance.client.auth.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
 
-        data: {
-          'first_name': _firstNameController.text.trim(),
-          'last_name': _lastNameController.text.trim(),
-          'role': 'student',
-        },
+        data: {'role': 'student'},
       );
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Account created successfully')),
-        );
+      final user = response.user;
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-        );
+      if (user != null) {
+        await Supabase.instance.client.from('profiles').insert({
+          'id': user.id,
+
+          'first_name': _firstNameController.text.trim(),
+
+          'last_name': _lastNameController.text.trim(),
+
+          'email': _emailController.text.trim(),
+
+          'role': 'student',
+        });
       }
     } on AuthException catch (e) {
       ScaffoldMessenger.of(
